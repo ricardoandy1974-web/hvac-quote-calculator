@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get an Instant HVAC Estimate</title>
+<meta name="description" content="Get an instant estimate for AC and heating service, then request your exact quote.">
+<style>
+  :root {
+    --navy: #0f2a43;
+    --blue: #1565c0;
+    --blue-soft: #e8f1fb;
+    --orange: #f28c28;
+    --ink: #17212b;
+    --muted: #64707d;
+    --line: #dbe3ec;
+    --bg: #f4f7fa;
+    --card: #ffffff;
+    --ok: #1b7f4b;
+    --err: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.45; }
+  header { background: var(--navy); color: #fff; padding: 18px 20px; }
+  .bar { max-width: 1060px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .brand { font-weight: 700; font-size: 19px; letter-spacing: .01em; }
+  .brand span { color: var(--orange); }
+  .phone { color: #fff; text-decoration: none; font-weight: 600; }
+  .hero { max-width: 1060px; margin: 0 auto; padding: 30px 20px 6px; }
+  .hero h1 { margin: 0 0 6px; font-size: 30px; color: var(--navy); }
+  .hero p { margin: 0; color: var(--muted); }
+  .layout { max-width: 1060px; margin: 0 auto; padding: 18px 20px 50px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 22px; align-items: start; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; margin-bottom: 18px; }
+  .step { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 17px; font-weight: 700; color: var(--navy); }
+  .step i { font-style: normal; width: 26px; height: 26px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 14px; display: grid; place-items: center; }
+  .opts { display: grid; gap: 10px; }
+  .opts.two { grid-template-columns: 1fr 1fr; }
+  .opt { position: relative; }
+  .opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
+  .opt .face { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; background: #fff; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+  .opt .t { font-weight: 600; }
+  .opt .d { font-size: 13px; color: var(--muted); }
+  .opt .p { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .opt input:checked + .face { border-color: var(--blue); background: var(--blue-soft); box-shadow: 0 0 0 2px rgba(21,101,192,.12); }
+  .opt input:focus-visible + .face { outline: 3px solid rgba(21,101,192,.4); }
+  .hidden { display: none !important; }
+  .summary { position: sticky; top: 16px; }
+  .summary .card { border-color: var(--blue); margin-bottom: 0; }
+  .eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+  .range { font-size: 36px; font-weight: 800; color: var(--navy); margin: 6px 0 2px; }
+  .range.empty { font-size: 18px; font-weight: 600; color: var(--muted); }
+  .sub { font-size: 13px; color: var(--muted); }
+  .lines { margin: 16px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+  .lines li { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .disc { font-size: 12px; color: var(--muted); margin-top: 12px; }
+  label.f { display: block; font-size: 14px; font-weight: 600; margin: 12px 0 5px; }
+  .in { width: 100%; padding: 12px 13px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); }
+  .in:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(21,101,192,.15); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn { margin-top: 18px; width: 100%; padding: 15px; font-size: 17px; font-weight: 700; color: #fff; background: var(--orange); border: 0; border-radius: 12px; cursor: pointer; }
+  .btn:hover { filter: brightness(.95); }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .msg { margin-top: 12px; font-size: 14px; min-height: 20px; }
+  .msg.err { color: var(--err); }
+  .success { background: #eaf7f0; border: 1px solid #b8e2cb; color: #12583a; border-radius: 12px; padding: 18px; }
+  .success h3 { margin: 0 0 6px; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 0 20px 30px; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .summary { position: static; order: -1; }
+    .hero h1 { font-size: 25px; }
+  }
+  @media (max-width: 520px) { .opts.two, .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand" id="brandName"></div>
+    <a class="phone" id="brandPhone" href="#"></a>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Get your HVAC estimate in under a minute</h1>
+  <p>Choose your service, see a price range instantly, then send us your details for an exact quote.</p>
+</section>
+
+<main class="layout">
+  <div>
+    <div class="card">
+      <h2 class="step"><i>1</i> What do you need?</h2>
+      <div class="opts" id="serviceOpts"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="step"><i>2</i> How big is your home?</h2>
+      <div class="opts two" id="sizeOpts"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="step"><i>3</i> How soon do you need us?</h2>
+      <div class="opts" id="urgencyOpts"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="step"><i>4</i> Any add-ons? <span class="sub">(optional)</span></h2>
+      <div class="opts" id="extraOpts"></div>
+    </div>
+
+    <div class="card" id="formCard">
+      <h2 class="step"><i>5</i> Request your exact quote</h2>
+      <form id="quoteForm" novalidate>
+        <div class="grid2">
+          <div><label class="f" for="name">Full name</label><input class="in" id="name" autocomplete="name"></div>
+          <div><label class="f" for="phone">Phone</label><input class="in" id="phone" type="tel" autocomplete="tel" inputmode="tel"></div>
+        </div>
+        <div class="grid2">
+          <div><label class="f" for="email">Email</label><input class="in" id="email" type="email" autocomplete="email"></div>
+          <div><label class="f" for="zip">ZIP code</label><input class="in" id="zip" autocomplete="postal-code" inputmode="numeric" maxlength="10"></div>
+        </div>
+        <label class="f" for="when">Preferred time</label>
+        <select class="in" id="when">
+          <option>Morning (8am – 12pm)</option>
+          <option>Afternoon (12pm – 5pm)</option>
+          <option>Evening (5pm – 8pm)</option>
+          <option>Anytime</option>
+        </select>
+        <label class="f" for="notes">Anything we should know? <span class="sub">(optional)</span></label>
+        <textarea class="in" id="notes" rows="3" maxlength="600" placeholder="Example: AC is blowing warm air since yesterday."></textarea>
+        <input type="checkbox" id="botcheck" class="hidden" tabindex="-1" autocomplete="off">
+        <button class="btn" id="submitBtn" type="submit">Send my quote request</button>
+        <div class="msg" id="formMsg" role="alert"></div>
+      </form>
+    </div>
+  </div>
+
+  <aside class="summary">
+    <div class="card">
+      <div class="eyebrow">Your estimate</div>
+      <div class="range empty" id="range">Choose a service to see your price</div>
+      <div class="sub" id="rangeSub"></div>
+      <ul class="lines" id="lines"></ul>
+      <div class="disc">This is an estimate only. Final pricing is confirmed after we review your system. No obligation.</div>
+    </div>
+  </aside>
+</main>
+
+<footer id="foot"></footer>
+
+<script>
+/* =====================================================================
+   1) SETTINGS: this is the part you change for each new client.
+   ===================================================================== */
+const CONFIG = {
+  business: "Comfort Pro Heating & Air",   // client's business name
+  phone: "(555) 123-4567",                  // client's phone number
+  // Free form service: get an access key at web3forms.com (enter the owner's email).
+  // Until you paste a real key, the form runs in DEMO mode and sends nothing.
+  formKey: "YOUR_WEB3FORMS_ACCESS_KEY",
+  rangeLow: 0.90,    // estimate range = total x 0.90 ...
+  rangeHigh: 1.15    // ... up to total x 1.15
+};
+
+/* Home sizes. The order matters: each price list below has one price per size. */
+const SIZES = [
+  { label: "Up to 1,000 sq ft" },
+  { label: "1,001 – 1,800 sq ft" },
+  { label: "1,801 – 2,600 sq ft" },
+  { label: "Over 2,600 sq ft" }
+];
+
+/* Services. prices = [size 1, size 2, size 3, size 4]. install:true marks installation jobs. */
+const SERVICES = [
+  { id: "ac_repair",   label: "AC repair",                desc: "Diagnosis and typical repair",       prices: [180, 210, 240, 280] },
+  { id: "heat_repair", label: "Furnace / heating repair", desc: "Diagnosis and typical repair",       prices: [190, 220, 250, 290] },
+  { id: "ac_tune",     label: "AC tune-up",               desc: "Full seasonal inspection and clean", prices: [99, 109, 119, 139] },
+  { id: "heat_tune",   label: "Furnace tune-up",          desc: "Full seasonal inspection and clean", prices: [99, 109, 119, 139] },
+  { id: "duct",        label: "Duct cleaning",            desc: "Whole-home air duct cleaning",       prices: [350, 450, 575, 725] },
+  { id: "inst_ac",     label: "New AC installation",      desc: "Equipment and professional install", prices: [4500, 5800, 7200, 9000], install: true },
+  { id: "inst_furn",   label: "New furnace installation", desc: "Equipment and professional install", prices: [3800, 4800, 6000, 7500], install: true },
+  { id: "inst_hp",     label: "New heat pump installation", desc: "Heating and cooling in one system", prices: [5500, 7000, 8800, 10500], install: true }
+];
+
+/* How soon. fee is added to the total. */
+const URGENCY = [
+  { id: "std",  label: "This week",             desc: "Next available appointment",   fee: 0 },
+  { id: "fast", label: "Within 24 hours",       desc: "Priority scheduling",          fee: 75 },
+  { id: "emer", label: "Emergency, today",      desc: "Same-day or after-hours visit", fee: 150 }
+];
+
+/* Add-ons. onlyInstall:true means it only shows for installation jobs. */
+const EXTRAS = [
+  { id: "thermo", label: "Smart thermostat",                desc: "Supplied and installed",             price: 250 },
+  { id: "filter", label: "High-efficiency air filter",      desc: "MERV 13 filter and install",         price: 85 },
+  { id: "uv",     label: "UV air purifier",                 desc: "Whole-home air quality upgrade",     price: 450 },
+  { id: "plan",   label: "Annual maintenance plan",         desc: "2 tune-up visits per year",          price: 179 },
+  { id: "haul",   label: "Remove and dispose of old unit",  desc: "Installations only",                 price: 150, onlyInstall: true }
+];
+
+/* =====================================================================
+   2) THE LOGIC: you normally don't need to change anything below.
+   ===================================================================== */
+const state = { service: null, size: 0, urgency: "std", extras: new Set() };
+const $ = id => document.getElementById(id);
+const money = n => "$" + Math.round(n).toLocaleString("en-US");
+const roundTo5 = n => Math.round(n / 5) * 5;
+const serviceById = id => SERVICES.find(s => s.id === id);
+
+function radioCard(name, value, title, desc, right, checked) {
+  return '<label class="opt"><input type="radio" name="' + name + '" value="' + value + '"' + (checked ? " checked" : "") + '>' +
+    '<div class="face"><div><div class="t">' + title + '</div>' + (desc ? '<div class="d">' + desc + '</div>' : "") + '</div>' +
+    (right ? '<div class="p">' + right + '</div>' : "") + '</div></label>';
+}
+function checkCard(id, title, desc, right, cls) {
+  return '<label class="opt ' + (cls || "") + '" data-extra="' + id + '"><input type="checkbox" value="' + id + '">' +
+    '<div class="face"><div><div class="t">' + title + '</div><div class="d">' + desc + '</div></div><div class="p">' + right + '</div></div></label>';
+}
+
+function buildOptions() {
+  $("serviceOpts").innerHTML = SERVICES.map(s => radioCard("service", s.id, s.label, s.desc, "", false)).join("");
+  $("sizeOpts").innerHTML = SIZES.map((z, i) => radioCard("size", i, z.label, "", "", i === 0)).join("");
+  $("urgencyOpts").innerHTML = URGENCY.map(u => radioCard("urgency", u.id, u.label, u.desc, u.fee ? "+" + money(u.fee) : "Included", u.id === state.urgency)).join("");
+  $("extraOpts").innerHTML = EXTRAS.map(x => checkCard(x.id, x.label, x.desc, "+" + money(x.price), x.onlyInstall ? "hidden" : "")).join("");
+}
+
+function calculate() {
+  const svc = serviceById(state.service);
+  if (!svc) return null;
+  const items = [{ label: svc.label + " (" + SIZES[state.size].label + ")", amount: svc.prices[state.size] }];
+  const u = URGENCY.find(x => x.id === state.urgency);
+  if (u && u.fee) items.push({ label: u.label, amount: u.fee });
+  EXTRAS.forEach(x => {
+    if (!state.extras.has(x.id)) return;
+    if (x.onlyInstall && !svc.install) return;
+    items.push({ label: x.label, amount: x.price });
+  });
+  const total = items.reduce((sum, i) => sum + i.amount, 0);
+  return { items, total, low: roundTo5(total * CONFIG.rangeLow), high: roundTo5(total * CONFIG.rangeHigh) };
+}
+
+function render() {
+  const svc = serviceById(state.service);
+  // show or hide installation-only add-ons
+  EXTRAS.forEach(x => {
+    if (!x.onlyInstall) return;
+    const el = document.querySelector('[data-extra="' + x.id + '"]');
+    const show = !!(svc && svc.install);
+    el.classList.toggle("hidden", !show);
+    if (!show) { state.extras.delete(x.id); el.querySelector("input").checked = false; }
+  });
+
+  const q = calculate();
+  const range = $("range");
+  if (!q) {
+    range.className = "range empty";
+    range.textContent = "Choose a service to see your price";
+    $("rangeSub").textContent = "";
+    $("lines").innerHTML = "";
+    return;
+  }
+  range.className = "range";
+  range.textContent = money(q.low) + " – " + money(q.high);
+  $("rangeSub").textContent = "Estimated range · base total " + money(q.total);
+  $("lines").innerHTML = q.items.map(i => "<li><span>" + i.label + "</span><span>" + money(i.amount) + "</span></li>").join("");
+}
+
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.name === "service") state.service = t.value;
+  else if (t.name === "size") state.size = Number(t.value);
+  else if (t.name === "urgency") state.urgency = t.value;
+  else if (t.type === "checkbox" && t.closest("#extraOpts")) { t.checked ? state.extras.add(t.value) : state.extras.delete(t.value); }
+  else return;
+  render();
+});
+
+/* ---------- Form: validates, then sends the quote to the owner's email ---------- */
+function setMsg(text, isErr) { const m = $("formMsg"); m.textContent = text; m.className = "msg" + (isErr ? " err" : ""); }
+
+$("quoteForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  setMsg("", false);
+  const q = calculate();
+  if (!q) return setMsg("Please choose a service in step 1 first.", true);
+
+  const name = $("name").value.trim(), phone = $("phone").value.trim(), email = $("email").value.trim(), zip = $("zip").value.trim();
+  if (name.length < 2) return setMsg("Please enter your name.", true);
+  if (phone.replace(/\D/g, "").length < 7) return setMsg("Please enter a valid phone number.", true);
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setMsg("Please enter a valid email address.", true);
+  if ($("botcheck").checked) return; // spam bots tick the hidden box
+
+  const svc = serviceById(state.service);
+  const summary = q.items.map(i => i.label + ": " + money(i.amount)).join("\n");
+  const payload = {
+    access_key: CONFIG.formKey,
+    subject: "New quote request: " + svc.label + " (" + money(q.low) + " - " + money(q.high) + ")",
+    from_name: CONFIG.business + " website",
+    name, phone, email, zip,
+    preferred_time: $("when").value,
+    notes: $("notes").value.trim(),
+    estimate_range: money(q.low) + " - " + money(q.high),
+    quote_details: summary
+  };
+
+  const btn = $("submitBtn");
+  btn.disabled = true; btn.textContent = "Sending...";
+  try {
+    const demo = CONFIG.formKey === "YOUR_WEB3FORMS_ACCESS_KEY";
+    if (!demo) {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || "Send failed");
+    }
+    $("formCard").innerHTML = '<div class="success"><h3>Thank you, ' + name.replace(/[<>&"]/g, "") + '!</h3>' +
+      '<p>We received your request and will call you soon to confirm your exact quote.</p>' +
+      (demo ? '<p><strong>Demo mode:</strong> nothing was sent. Add a Web3Forms access key to receive requests by email.</p>' : "") +
+      '</div>';
+  } catch (err) {
+    btn.disabled = false; btn.textContent = "Send my quote request";
+    setMsg("Sorry, something went wrong. Please call us at " + CONFIG.phone + ".", true);
+  }
+});
+
+/* ---------- Start up ---------- */
+$("brandName").innerHTML = CONFIG.business.replace("&", "<span>&amp;</span>");
+$("brandPhone").textContent = CONFIG.phone;
+$("brandPhone").href = "tel:" + CONFIG.phone.replace(/[^\d+]/g, "");
+$("foot").textContent = "© " + new Date().getFullYear() + " " + CONFIG.business + ". Estimates are not binding quotes.";
+buildOptions();
+render();
+</script>
+</body>
+</html>
